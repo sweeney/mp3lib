@@ -106,7 +106,7 @@ func NextFrame(stream io.Reader) (*MP3Frame, error) {
 		case *ID3v2Tag:
 			return nil, ErrID3v2
 		case nil:
-			return nil, NilFrame
+			return nil, EOF
 		}
 	}
 }
@@ -133,7 +133,6 @@ func NextID3v2Tag(stream io.Reader) *ID3v2Tag {
 // over unrecognised/garbage data. Returns *MP3Frame, *ID3v1Tag, *ID3v2Tag,
 // or nil when the stream has been exhausted.
 func NextObject(stream io.Reader) interface{} {
-
 	// Each MP3 frame begins with a 4-byte header.
 	buffer := make([]byte, 4)
 	lastByte := buffer[3:]
