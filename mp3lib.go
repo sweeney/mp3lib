@@ -44,7 +44,6 @@ const (
 
 // errors
 var (
-	EOF      = errors.New("EOF")
 	NilFrame = errors.New("Frame is nil")
 	ErrID3v1 = errors.New("next frame: skipping ID3v1 tag")
 	ErrID3v2 = errors.New("next frame: skipping ID3v2 tag")
@@ -106,7 +105,7 @@ func NextFrame(stream io.Reader) (*MP3Frame, error) {
 		case *ID3v2Tag:
 			return nil, ErrID3v2
 		case nil:
-			return nil, EOF
+			return nil, io.EOF
 		}
 	}
 }
@@ -144,7 +143,6 @@ func NextObject(stream io.Reader) interface{} {
 
 	// Scan forward until we find an object or reach the end of the stream.
 	for {
-
 		// Check for an ID3v1 tag: 'TAG'.
 		if buffer[0] == 84 && buffer[1] == 65 && buffer[2] == 71 {
 
