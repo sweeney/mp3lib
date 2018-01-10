@@ -44,9 +44,10 @@ const (
 
 // errors
 var (
-	NilFrame = errors.New("Frame is nil")
-	ErrID3v1 = errors.New("next frame: skipping ID3v1 tag")
-	ErrID3v2 = errors.New("next frame: skipping ID3v2 tag")
+	NilFrame    = errors.New("Frame is nil")
+	ErrID3v1    = errors.New("Encountered ID3v1 tag")
+	ErrID3v2    = errors.New("Encountered ID3v2 tag")
+	ErrMP3Frame = errors.New("Encountered MP3 frame")
 )
 
 // Bit rates.
@@ -92,7 +93,7 @@ type ID3v2Tag struct {
 }
 
 // NextFrame loads the next MP3 frame from the input stream. Skips over ID3
-// tags and unrecognised/garbage data in the stream. Returns nil when the
+// tags and unrecognised/garbage data in the stream. Returns EOF error when the
 // stream has been exhausted.
 func NextFrame(stream io.Reader) (*MP3Frame, error) {
 	for {
@@ -111,19 +112,19 @@ func NextFrame(stream io.Reader) (*MP3Frame, error) {
 }
 
 // NextID3v2Tag loads the next ID3v2 tag from the input stream, skipping all
-// other data. Returns nil when the stream has been exhausted.
-func NextID3v2Tag(stream io.Reader) *ID3v2Tag {
+// other data. Returns EOF error when the stream has been exhausted.
+func NextID3v2Tag(stream io.Reader) (*ID3v2Tag, error) {
 	for {
 		obj := NextObject(stream)
 		switch obj := obj.(type) {
 		case *MP3Frame:
-			debug("next ID3v2 tag: skipping MP3 frame")
+			return nil, ErrMP3Frame
 		case *ID3v1Tag:
-			debug("next ID3v2 tag: skipping ID3v1 tag")
+			return nil, ErrID3v1
 		case *ID3v2Tag:
-			return obj
+			return obj, nil
 		case nil:
-			return nil
+			return nil, io.EOF
 		}
 	}
 }
