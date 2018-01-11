@@ -13,7 +13,7 @@ import (
 )
 
 // Library version.
-const Version = "0.7.0"
+const Version = "0.7.1"
 
 // Flag controlling the display of debugging information.
 var DebugMode = false
