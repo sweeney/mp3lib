@@ -129,6 +129,24 @@ func NextID3v2Tag(stream io.Reader) (*ID3v2Tag, error) {
 	}
 }
 
+// NextID3v2Tag loads the next ID3v2 tag or frame from the input stream, skipping all
+// other data. Returns EOF error when the stream has been exhausted.
+func NextFrameOrID3v2Tag(stream io.Reader) (*MP3Frame, *ID3v2Tag, error) {
+	for {
+		obj := NextObject(stream)
+		switch obj := obj.(type) {
+		case *MP3Frame:
+			return obj, nil, nil
+		case *ID3v1Tag:
+			return nil, nil, ErrID3v1
+		case *ID3v2Tag:
+			return nil, obj, nil
+		case nil:
+			return nil, nil, io.EOF
+		}
+	}
+}
+
 // NextObject loads the next recognised object from the input stream. Skips
 // over unrecognised/garbage data. Returns *MP3Frame, *ID3v1Tag, *ID3v2Tag,
 // or nil when the stream has been exhausted.
